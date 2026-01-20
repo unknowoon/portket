@@ -1,0 +1,64 @@
+---
+spring:
+  application:
+    name: portket
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  profiles:
+    include: oauth
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: portket
+      auto-offset-reset: earliest
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: INFO
+    org.apache.kafka.clients: WARN
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql: TRACE
+    org.hibernate.type.descriptor: TRACE
+    org.jooq.tools.LoggerListener: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET}
+  # 1Day
+  expiration-time: 86400000
+  # 2Weeks
+  refresh-expiration-time: 1209600000
+
+# 애플리케이션 기본 설정
+app:
+  cookie:
+    secure: ${APP_COOKIE_SECURE:true}
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:3000}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
