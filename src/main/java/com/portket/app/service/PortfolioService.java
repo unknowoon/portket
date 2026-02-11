@@ -20,9 +20,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static com.portket.app.constant.ComponentType.INSTRUMENT;
 import static com.portket.app.constant.ComponentType.TAG;
+import com.portket.exception.ErrorCode;
 import static com.portket.exception.ErrorCode.NOT_NULL;
 
 @Service
@@ -57,9 +59,10 @@ public class PortfolioService {
         if (StringUtils.isEmpty(name)) {
             throw new BizException("필수입력", NOT_NULL, "");
         }
-        Portfolio portfolio = portfolioRepository.findByName(name);
-        if (portfolio != null) {
-            throw new IllegalArgumentException("Already exist portfolio");
+        User user = SecurityUtils.getCurrentUserOrThrow();
+        Optional<Portfolio> portfolio = portfolioRepository.findByUserAndName(user, name);
+        if (portfolio.isPresent()) {
+            throw new BizException(ErrorCode.DUPLICATE_PORTFOLIO_NAME, "포트폴리오 이름: " + name);
         }
     }
 
@@ -71,6 +74,9 @@ public class PortfolioService {
         User user = SecurityUtils.getCurrentUserOrThrow();
 
         Portfolio portfolio = portfolioFinder.validOwner(input.getName(), user);
+
+        portfolio.getPortfolioInstruments().clear();
+        portfolio.getPortfolioTags().clear();
 
         addPortfolioComponent(input.getComponents(), portfolio, user);
     }

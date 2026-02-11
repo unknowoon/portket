@@ -18,6 +18,13 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "20001", "비밀번호가 잘못되었습니다."),
     USERNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "20002", "이미 사용 중인 사용자 이메일입니다."),
     
+    // 포트폴리오 관련 에러 (30000번대)
+    PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "30000", "해당하는 포트폴리오를 찾을 수 없습니다."),
+    DUPLICATE_PORTFOLIO_NAME(HttpStatus.BAD_REQUEST, "30001", "이미 존재하는 포트폴리오 이름입니다."),
+    INVALID_PORTFOLIO_WEIGHT(HttpStatus.BAD_REQUEST, "30002", "포트폴리오 총 비중은 100이어야 합니다."),
+    INVALID_COMPONENT_TYPE(HttpStatus.BAD_REQUEST, "30003", "올바르지 않은 컴포넌트 타입입니다."),
+    INVALID_COMPONENT_NAME(HttpStatus.BAD_REQUEST, "30004", "컴포넌트 이름이 없습니다."),
+
     // 서버 에러 (50000번대)
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "50000", "서버 내부 오류가 발생했습니다.");
 

@@ -54,6 +54,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, e.getErrorCode().getHttpStatus());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException e, HttpServletRequest request) {
+        log.warn("IllegalArgumentException at {}: {}", request.getRequestURI(), e.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         log.error("Unexpected error occurred at {}: {}", request.getRequestURI(), e.getMessage(), e);
