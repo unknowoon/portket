@@ -22,4 +22,5 @@ public class TransactionListInquiryOutput {
     private BigDecimal quantity;
     private BigDecimal amount;
     private BigDecimal averagePrice;
+    private String currency;
 }

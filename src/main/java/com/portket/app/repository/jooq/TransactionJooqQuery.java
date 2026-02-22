@@ -33,9 +33,17 @@ public class TransactionJooqQuery {
         int size = input.getSize();
         int offset = (page - 1) * size;
 
-        // 기본 조건: 사용자 ID 및 거래일 범위
-        Condition condition = TRANSACTIONS.USER_ID.eq(userId)
-                .and(TRANSACTIONS.TRANSACTION_DATE.between(input.getStartDate(), input.getEndDate()));
+        // 기본 조건: 사용자 ID
+        Condition condition = TRANSACTIONS.USER_ID.eq(userId);
+
+        // 거래일 범위 (startDate, endDate가 모두 있을 때만 적용)
+        if (input.getStartDate() != null && input.getEndDate() != null) {
+            condition = condition.and(TRANSACTIONS.TRANSACTION_DATE.between(input.getStartDate(), input.getEndDate()));
+        } else if (input.getStartDate() != null) {
+            condition = condition.and(TRANSACTIONS.TRANSACTION_DATE.greaterOrEqual(input.getStartDate()));
+        } else if (input.getEndDate() != null) {
+            condition = condition.and(TRANSACTIONS.TRANSACTION_DATE.lessOrEqual(input.getEndDate()));
+        }
 
         // 거래 유형(type)이 입력된 경우 추가 조건 적용
         if (StringUtils.isNotBlank(input.getType())) {
@@ -70,6 +78,7 @@ public class TransactionJooqQuery {
                     TransactionType type = record.get(TRANSACTIONS.TRANSACTION_TYPE, TransactionType.class);
                     BigDecimal quantity = record.get(TRANSACTIONS.QUANTITY, BigDecimal.class);
                     BigDecimal amount = record.get(TRANSACTIONS.AMOUNT, BigDecimal.class);
+                    String currency = record.get(INSTRUMENTS.CURRENCY, String.class);
                     BigDecimal averagePrice = FinancialCalculator.calculateAveragePrice(amount, quantity);
 
                     return TransactionListInquiryOutput.builder()
@@ -81,6 +90,7 @@ public class TransactionJooqQuery {
                             .quantity(quantity)
                             .amount(amount)
                             .averagePrice(averagePrice)
+                            .currency(currency)
                             .build();
                 })
                 .collect(Collectors.toList());
