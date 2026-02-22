@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -75,5 +76,11 @@ public class TransactionService {
     public PaginatedResponse<TransactionListInquiryOutput> list(TransactionListInquiryInput input) {
         User user = SecurityUtils.getCurrentUserOrThrow();
         return transactionFinder.list(input, user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionListInquiryOutput> recent(int limit) {
+        User user = SecurityUtils.getCurrentUserOrThrow();
+        return transactionFinder.recent(user.getId(), limit);
     }
 }

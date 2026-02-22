@@ -14,6 +14,7 @@ import org.jooq.Result;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +51,11 @@ public class TransactionJooqQuery {
             condition = condition.and(TRANSACTIONS.TRANSACTION_TYPE.eq(input.getType()));
         }
 
+        // 종목(ticker)이 입력된 경우 추가 조건 적용
+        if (StringUtils.isNotBlank(input.getTicker())) {
+            condition = condition.and(INSTRUMENTS.TICKER.eq(input.getTicker()));
+        }
+
         // 전체 건수 조회 (페이징 전)
         int totalCount = dsl.fetchCount(
                 dsl.select()
@@ -64,6 +70,7 @@ public class TransactionJooqQuery {
                 .join(INSTRUMENTS)
                     .on(TRANSACTIONS.INSTRUMENT_ID.eq(INSTRUMENTS.ID))
                 .where(condition)
+                .orderBy(TRANSACTIONS.TRANSACTION_DATE.desc(), TRANSACTIONS.ID.desc())
                 .limit(size)
                 .offset(offset)
                 .fetch();
@@ -79,6 +86,7 @@ public class TransactionJooqQuery {
                     BigDecimal quantity = record.get(TRANSACTIONS.QUANTITY, BigDecimal.class);
                     BigDecimal amount = record.get(TRANSACTIONS.AMOUNT, BigDecimal.class);
                     String currency = record.get(INSTRUMENTS.CURRENCY, String.class);
+                    if (currency == null) currency = "USD";
                     BigDecimal averagePrice = FinancialCalculator.calculateAveragePrice(amount, quantity);
 
                     return TransactionListInquiryOutput.builder()
@@ -91,6 +99,7 @@ public class TransactionJooqQuery {
                             .amount(amount)
                             .averagePrice(averagePrice)
                             .currency(currency)
+                            .transactionDate(record.get(TRANSACTIONS.TRANSACTION_DATE, LocalDate.class))
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -107,5 +116,39 @@ public class TransactionJooqQuery {
                 .totalPage(totalPage)
                 .data(data)
                 .build();
+    }
+
+    /**
+     * 최근 거래 내역 조회 (대시보드용)
+     */
+    public List<TransactionListInquiryOutput> recent(Long userId, int limit) {
+        Result<Record> records = dsl.select()
+                .from(TRANSACTIONS)
+                .join(INSTRUMENTS)
+                    .on(TRANSACTIONS.INSTRUMENT_ID.eq(INSTRUMENTS.ID))
+                .where(TRANSACTIONS.USER_ID.eq(userId))
+                .orderBy(TRANSACTIONS.TRANSACTION_DATE.desc(), TRANSACTIONS.ID.desc())
+                .limit(limit)
+                .fetch();
+
+        return records.stream()
+                .map(record -> {
+                    BigDecimal quantity = record.get(TRANSACTIONS.QUANTITY, BigDecimal.class);
+                    BigDecimal amount = record.get(TRANSACTIONS.AMOUNT, BigDecimal.class);
+
+                    return TransactionListInquiryOutput.builder()
+                            .id(record.get(TRANSACTIONS.ID, Long.class))
+                            .instrumentName(record.get(INSTRUMENTS.NAME, String.class))
+                            .ticker(record.get(INSTRUMENTS.TICKER, String.class))
+                            .country(record.get(INSTRUMENTS.COUNTRY, String.class))
+                            .type(record.get(TRANSACTIONS.TRANSACTION_TYPE, TransactionType.class))
+                            .quantity(quantity)
+                            .amount(amount)
+                            .averagePrice(FinancialCalculator.calculateAveragePrice(amount, quantity))
+                            .currency(record.get(INSTRUMENTS.CURRENCY, String.class) != null ? record.get(INSTRUMENTS.CURRENCY, String.class) : "USD")
+                            .transactionDate(record.get(TRANSACTIONS.TRANSACTION_DATE, LocalDate.class))
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

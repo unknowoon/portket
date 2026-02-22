@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -23,4 +24,5 @@ public class TransactionListInquiryOutput {
     private BigDecimal amount;
     private BigDecimal averagePrice;
     private String currency;
+    private LocalDate transactionDate;
 }

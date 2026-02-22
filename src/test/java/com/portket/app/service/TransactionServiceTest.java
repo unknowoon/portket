@@ -8,7 +8,7 @@ import com.portket.app.finder.PortfolioFinder;
 import com.portket.app.finder.TransactionFinder;
 import com.portket.app.repository.TransactionRepository;
 import com.portket.exception.BizException;
-import com.portket.security.SecurityUtils;
+import com.portket.util.system.SecurityUtils;
 import com.portket.util.TestDataBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

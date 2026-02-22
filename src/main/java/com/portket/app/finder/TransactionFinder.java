@@ -7,6 +7,8 @@ import com.portket.app.repository.jooq.TransactionJooqQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionFinder {
@@ -15,5 +17,9 @@ public class TransactionFinder {
 
     public PaginatedResponse<TransactionListInquiryOutput> list(TransactionListInquiryInput input, Long userId) {
         return jooqQuery.list(input, userId);
+    }
+
+    public List<TransactionListInquiryOutput> recent(Long userId, int limit) {
+        return jooqQuery.recent(userId, limit);
     }
 }

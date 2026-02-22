@@ -60,7 +60,7 @@ public class InstrumentFinder {
                 .ticker(instrument.getTicker())
                 .country(instrument.getCountry())
                 .market(instrument.getMarket())
-                .currency(instrument.getCurrency().getCode())
+                .currency(instrument.getCurrency() != null ? instrument.getCurrency().getCode() : "USD")
                 .currentPrice(instrument.getCurrentPrice())
                 .build();
     }
@@ -82,7 +82,7 @@ public class InstrumentFinder {
                         .ticker(instrument.getTicker())
                         .country(instrument.getCountry())
                         .market(instrument.getMarket())
-                        .currency(instrument.getCurrency().getCode())
+                        .currency(instrument.getCurrency() != null ? instrument.getCurrency().getCode() : "USD")
                         .currentPrice(instrument.getCurrentPrice())
                         .build())
                 .toList();

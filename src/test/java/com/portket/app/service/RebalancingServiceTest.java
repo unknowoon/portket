@@ -6,7 +6,7 @@ import com.portket.app.dto.RebalancingOutput;
 import com.portket.app.repository.HoldingRepository;
 import com.portket.app.repository.PortfolioRepository;
 import com.portket.exception.BizException;
-import com.portket.security.SecurityUtils;
+import com.portket.util.system.SecurityUtils;
 import com.portket.util.TestDataBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
