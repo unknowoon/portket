@@ -6,6 +6,7 @@ import com.portket.app.dto.http.PaginatedResponse;
 import com.portket.app.service.InstrumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +17,7 @@ public class InstrumentController {
     private final InstrumentService instrumentService;
 
     @GetMapping
-    public ResponseEntity<PaginatedResponse<InstrumentListInqOutput>> list(@ModelAttribute InstrumentListInqInput req) {
+    public ResponseEntity<PaginatedResponse<InstrumentListInqOutput>> list(@Valid @ModelAttribute InstrumentListInqInput req) {
         return ResponseEntity.ok(instrumentService.list(req));
     }
 

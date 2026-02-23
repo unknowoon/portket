@@ -61,6 +61,6 @@ public class InstrumentJooqQuery {
 
         int totalPage = (int) Math.ceil((double) totalCount / size);
 
-        return PaginatedResponse.<InstrumentListInqOutput>builder().page(page).totalPage(totalPage).data(data).build();
+        return PaginatedResponse.<InstrumentListInqOutput>builder().page(page).size(size).totalPage(totalPage).totalElements(totalCount).data(data).build();
     }
 }
