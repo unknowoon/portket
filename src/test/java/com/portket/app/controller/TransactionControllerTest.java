@@ -28,6 +28,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
 @WebMvcTest(TransactionController.class)
@@ -124,6 +127,57 @@ class TransactionControllerTest {
         verify(transactionService, times(1)).list(any(TransactionListInquiryInput.class));
     }
     
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1"})
+    @WithMockUser
+    @DisplayName("거래 목록 조회 실패 - size가 1 미만이면 400")
+    void listTransactions_SizeBelowMin(String size) throws Exception {
+        mockMvc.perform(get("/api/transactions")
+                .param("page", "1")
+                .param("size", size))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(transactionService, never()).list(any(TransactionListInquiryInput.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"51", "100"})
+    @WithMockUser
+    @DisplayName("거래 목록 조회 실패 - size가 50 초과면 400")
+    void listTransactions_SizeAboveMax(String size) throws Exception {
+        mockMvc.perform(get("/api/transactions")
+                .param("page", "1")
+                .param("size", size))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(transactionService, never()).list(any(TransactionListInquiryInput.class));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("거래 목록 조회 성공 - totalElements가 응답에 포함됨")
+    void listTransactions_TotalElementsReturned() throws Exception {
+        PaginatedResponse<TransactionListInquiryOutput> response = PaginatedResponse.<TransactionListInquiryOutput>builder()
+                .page(1)
+                .size(10)
+                .totalPage(1)
+                .totalElements(5)
+                .data(Collections.emptyList())
+                .build();
+
+        when(transactionService.list(any(TransactionListInquiryInput.class))).thenReturn(response);
+
+        mockMvc.perform(get("/api/transactions")
+                .param("page", "1")
+                .param("size", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(5))
+                .andExpect(jsonPath("$.size").value(10));
+    }
+
     @Test
     @DisplayName("거래 생성 실패 - 인증 없음")
     void createTransaction_Unauthorized() throws Exception {

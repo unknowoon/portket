@@ -113,7 +113,9 @@ public class TransactionJooqQuery {
 
         return PaginatedResponse.<TransactionListInquiryOutput>builder()
                 .page(page)
+                .size(size)
                 .totalPage(totalPage)
+                .totalElements(totalCount)
                 .data(data)
                 .build();
     }
